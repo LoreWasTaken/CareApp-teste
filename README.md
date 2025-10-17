@@ -69,7 +69,7 @@ Follow these steps to set up and run the project locally:
 
 ## 1. Clone the repository
 ```
-git clone <https://github.dev/LoreWasTaken/CareApp-teste>
+git clone https://github.com/LoreWasTaken/CareApp-teste
 cd CareApp-teste
 ```
 
@@ -100,17 +100,17 @@ yarn expo start
 # Running the App
 
 ## On a real device:
-    1. Install the **Expo Go** app *([iOS App store](https://apps.apple.com/app/expo-go/id982107779) / [Google play](https://play.google.com/store/apps/details?id=host.exp.exponent))*.
-    2. Run the development server.
-    3. Scan the QR code shown in the terminal or browser.
+1. Install the **Expo Go** app *([iOS App store](https://apps.apple.com/app/expo-go/id982107779) / [Google play](https://play.google.com/store/apps/details?id=host.exp.exponent))*.
+2. Run the development server.
+3. Scan the QR code shown in the terminal or browser.
 ## On an emulator/simulator:
-    - Press `i` to open iOS simulator *(requires Xcode)*.
-    - Press `a` to open Android Emulator *(requires Android Studio)*.
+- Press `i` to open iOS simulator *(requires Xcode)*.
+- Press `a` to open Android Emulator *(requires Android Studio)*.
 ## On the web:
-        ```
-        bunx expo start --web
-        ```
-    This opens the app at http://localhost:8081
+```
+bunx expo start --web
+```
+This opens the app at http://localhost:8081
 
 ---
 
