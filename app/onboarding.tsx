@@ -28,11 +28,14 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const { completeOnboarding } = useApp();
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const passwordInputRef = useRef<TextInput | null>(null);
+  const confirmPasswordInputRef = useRef<TextInput | null>(null);
 
   useEffect(() => {
     Animated.parallel([
@@ -71,27 +74,38 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleComplete = (skip: boolean = false) => {
-    if (skip) {
-      console.log('[Onboarding] Skipping login, continuing as guest');
-      completeOnboarding({ email: '', password: '' });
-      router.replace('/');
-      return;
-    }
-
+  const handleComplete = () => {
+    const trimmedName = name.trim();
     const normalizedEmail = email.trim().toLowerCase();
     const sanitizedPassword = password.trim();
+    const sanitizedConfirm = confirmPassword.trim();
 
-    if (!normalizedEmail || !sanitizedPassword) {
+    if (!normalizedEmail || !sanitizedPassword || !sanitizedConfirm) {
       Alert.alert(
         'Missing information',
-        'Please enter both your email and password to continue.'
+        'Please fill out email, password, and password confirmation.'
       );
       return;
     }
 
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(normalizedEmail)) {
+      Alert.alert('Invalid email', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (sanitizedPassword.length < 6) {
+      Alert.alert('Weak password', 'Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (sanitizedPassword !== sanitizedConfirm) {
+      Alert.alert('Passwords do not match', 'Please make sure both passwords match.');
+      return;
+    }
+
     console.log('[Onboarding] Completing login for email:', normalizedEmail);
-    completeOnboarding({ email: normalizedEmail, password: sanitizedPassword });
+    completeOnboarding({ name: trimmedName, email: normalizedEmail, password: sanitizedPassword });
     router.replace('/');
   };
 
@@ -121,7 +135,19 @@ export default function OnboardingScreen() {
 
         {isLastStep && (
           <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
-            <Text style={styles.inputLabel}>Log in to continue</Text>
+            <Text style={styles.inputLabel}>Create your CareApp account</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Name (optional)"
+              placeholderTextColor={Colors.textLight}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+              returnKeyType="next"
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
+              blurOnSubmit={false}
+              testID="onboarding-name-input"
+            />
             <TextInput
               style={styles.input}
               placeholder="you@example.com"
@@ -149,9 +175,25 @@ export default function OnboardingScreen() {
               autoCapitalize="none"
               autoComplete="password"
               textContentType="password"
-              returnKeyType="done"
-              onSubmitEditing={() => handleComplete()}
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
               testID="onboarding-password-input"
+            />
+            <Text style={[styles.inputLabel, styles.passwordLabel]}>Confirm Password</Text>
+            <TextInput
+              ref={confirmPasswordInputRef}
+              style={styles.input}
+              placeholder="Re-enter your password"
+              placeholderTextColor={Colors.textLight}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              autoComplete="password"
+              textContentType="password"
+              returnKeyType="done"
+              onSubmitEditing={handleComplete}
+              testID="onboarding-confirm-password-input"
             />
           </Animated.View>
         )}
@@ -177,7 +219,7 @@ export default function OnboardingScreen() {
             activeOpacity={0.8}
             testID="onboarding-complete-button"
           >
-            <Text style={styles.buttonText}>Log In</Text>
+            <Text style={styles.buttonText}>Register</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -187,17 +229,6 @@ export default function OnboardingScreen() {
             testID="onboarding-next-button"
           >
             <Text style={styles.buttonText}>Continue</Text>
-          </TouchableOpacity>
-        )}
-
-        {!isLastStep && (
-          <TouchableOpacity
-            style={styles.skipButton}
-            onPress={() => handleComplete(true)}
-            activeOpacity={0.6}
-            testID="onboarding-skip-button"
-          >
-            <Text style={styles.skipButtonText}>Skip</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -325,15 +356,5 @@ const styles = StyleSheet.create({
     color: Colors.surface,
     fontSize: FontSizes.xl,
     fontWeight: '600' as const,
-  },
-  skipButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-  },
-  skipButtonText: {
-    color: Colors.textSecondary,
-    fontSize: FontSizes.md,
-    fontWeight: '500' as const,
   },
 });

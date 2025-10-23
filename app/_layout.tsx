@@ -11,7 +11,7 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { appData, isLoading } = useApp();
+  const { appData, isLoading, isAuthenticated } = useApp();
   const segments = useSegments();
   const router = useRouter();
 
@@ -19,20 +19,31 @@ function RootLayoutNav() {
     if (isLoading) return;
 
     const inOnboarding = segments[0] === 'onboarding';
+    const inLogin = segments[0] === 'login';
 
     if (!appData.onboardingCompleted && !inOnboarding) {
       console.log('[RootLayout] Redirecting to onboarding');
       router.replace('/onboarding');
-    } else if (appData.onboardingCompleted && inOnboarding) {
+      return;
+    }
+
+    if (appData.onboardingCompleted && !isAuthenticated && !inLogin) {
+      console.log('[RootLayout] Redirecting to login');
+      router.replace('/login');
+      return;
+    }
+
+    if (isAuthenticated && (inOnboarding || inLogin)) {
       console.log('[RootLayout] Redirecting to home');
       router.replace('/');
     }
-  }, [appData.onboardingCompleted, isLoading, segments]);
+  }, [appData.onboardingCompleted, isAuthenticated, isLoading, segments]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="onboarding" />
+      <Stack.Screen name="login" />
       <Stack.Screen name="settings" options={{ presentation: "modal" }} />
       <Stack.Screen name="add-medication" options={{ presentation: "modal" }} />
     </Stack>

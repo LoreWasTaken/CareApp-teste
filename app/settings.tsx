@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Platform, Alert } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { ChevronLeft, User, Palette, Bell, Volume2, Vibrate, Trash2 } from 'lucide-react-native';
 import { Colors, Spacing, BorderRadius, FontSizes } from '@/constants/colors';
@@ -6,7 +6,7 @@ import { useApp } from '@/contexts/AppContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { appData, updateSettings } = useApp();
+  const { appData, updateSettings, clearData } = useApp();
   const { user } = appData;
   
   const fontSize = user.largeText ? FontSizes.xl : FontSizes.lg;
@@ -122,6 +122,23 @@ export default function SettingsScreen() {
               style={styles.dangerButton}
               activeOpacity={0.8}
               testID="clear-data-button"
+              onPress={() => {
+                Alert.alert(
+                  'Clear all data?',
+                  'This will remove your account, medications, and history from this device.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { 
+                      text: 'Clear', 
+                      style: 'destructive',
+                      onPress: async () => {
+                        await clearData();
+                        router.replace('/onboarding');
+                      },
+                    },
+                  ],
+                );
+              }}
             >
               <Trash2 size={20} color={Colors.error} />
               <Text style={[styles.dangerButtonText, { fontSize }]}>Clear All Data</Text>
