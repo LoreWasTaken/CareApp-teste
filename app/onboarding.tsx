@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Platform, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -34,6 +34,7 @@ export default function OnboardingScreen() {
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const emailInputRef = useRef<TextInput | null>(null);
   const passwordInputRef = useRef<TextInput | null>(null);
   const confirmPasswordInputRef = useRef<TextInput | null>(null);
 
@@ -115,123 +116,138 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.content}>
-        <Animated.View 
-          style={[
-            styles.iconContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+      >
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+          showsVerticalScrollIndicator={false}
         >
-          <Icon size={80} color={Colors.primary} strokeWidth={1.5} />
-        </Animated.View>
-
-        <Animated.View style={{ opacity: fadeAnim }}>
-          <Text style={styles.title}>{currentStepData.title}</Text>
-          <Text style={styles.description}>{currentStepData.description}</Text>
-        </Animated.View>
-
-        {isLastStep && (
-          <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
-            <Text style={styles.inputLabel}>Create your CareApp account</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Name (optional)"
-              placeholderTextColor={Colors.textLight}
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              returnKeyType="next"
-              onSubmitEditing={() => passwordInputRef.current?.focus()}
-              blurOnSubmit={false}
-              testID="onboarding-name-input"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="you@example.com"
-              placeholderTextColor={Colors.textLight}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              textContentType="emailAddress"
-              returnKeyType="next"
-              onSubmitEditing={() => passwordInputRef.current?.focus()}
-              blurOnSubmit={false}
-              testID="onboarding-email-input"
-            />
-            <Text style={[styles.inputLabel, styles.passwordLabel]}>Password</Text>
-            <TextInput
-              ref={passwordInputRef}
-              style={styles.input}
-              placeholder="Enter your password"
-              placeholderTextColor={Colors.textLight}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              autoComplete="password"
-              textContentType="password"
-              returnKeyType="next"
-              onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
-              testID="onboarding-password-input"
-            />
-            <Text style={[styles.inputLabel, styles.passwordLabel]}>Confirm Password</Text>
-            <TextInput
-              ref={confirmPasswordInputRef}
-              style={styles.input}
-              placeholder="Re-enter your password"
-              placeholderTextColor={Colors.textLight}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              autoComplete="password"
-              textContentType="password"
-              returnKeyType="done"
-              onSubmitEditing={handleComplete}
-              testID="onboarding-confirm-password-input"
-            />
-          </Animated.View>
-        )}
-
-        <View style={styles.progressContainer}>
-          {STEPS.map((_, index) => (
-            <View
-              key={index}
+          <View style={styles.content}>
+            <Animated.View 
               style={[
-                styles.progressDot,
-                index === currentStep && styles.progressDotActive,
+                styles.iconContainer,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }],
+                },
               ]}
-            />
-          ))}
-        </View>
-      </View>
+            >
+              <Icon size={80} color={Colors.primary} strokeWidth={1.5} />
+            </Animated.View>
 
-      <View style={styles.footer}>
-        {isLastStep ? (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleComplete}
-            activeOpacity={0.8}
-            testID="onboarding-complete-button"
-          >
-            <Text style={styles.buttonText}>Register</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleNext}
-            activeOpacity={0.8}
-            testID="onboarding-next-button"
-          >
-            <Text style={styles.buttonText}>Continue</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+            <Animated.View style={{ opacity: fadeAnim }}>
+              <Text style={styles.title}>{currentStepData.title}</Text>
+              <Text style={styles.description}>{currentStepData.description}</Text>
+            </Animated.View>
+
+            {isLastStep && (
+              <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
+                <Text style={styles.inputLabel}>Create your CareApp account</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Name (optional)"
+                  placeholderTextColor={Colors.textLight}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                  returnKeyType="next"
+                  onSubmitEditing={() => emailInputRef.current?.focus()}
+                  blurOnSubmit={false}
+                  testID="onboarding-name-input"
+                />
+                <TextInput
+                  ref={emailInputRef}
+                  style={styles.input}
+                  placeholder="you@example.com"
+                  placeholderTextColor={Colors.textLight}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  textContentType="emailAddress"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordInputRef.current?.focus()}
+                  blurOnSubmit={false}
+                  testID="onboarding-email-input"
+                />
+                <Text style={[styles.inputLabel, styles.passwordLabel]}>Password</Text>
+                <TextInput
+                  ref={passwordInputRef}
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  placeholderTextColor={Colors.textLight}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoComplete="password"
+                  textContentType="password"
+                  returnKeyType="next"
+                  onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
+                  testID="onboarding-password-input"
+                />
+                <Text style={[styles.inputLabel, styles.passwordLabel]}>Confirm Password</Text>
+                <TextInput
+                  ref={confirmPasswordInputRef}
+                  style={styles.input}
+                  placeholder="Re-enter your password"
+                  placeholderTextColor={Colors.textLight}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoComplete="password"
+                  textContentType="password"
+                  returnKeyType="done"
+                  onSubmitEditing={handleComplete}
+                  testID="onboarding-confirm-password-input"
+                />
+              </Animated.View>
+            )}
+
+            <View style={styles.progressContainer}>
+              {STEPS.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.progressDot,
+                    index === currentStep && styles.progressDotActive,
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            {isLastStep ? (
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleComplete}
+                activeOpacity={0.8}
+                testID="onboarding-complete-button"
+              >
+                <Text style={styles.buttonText}>Register</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleNext}
+                activeOpacity={0.8}
+                testID="onboarding-next-button"
+              >
+                <Text style={styles.buttonText}>Continue</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -241,11 +257,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  flex: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: Spacing.xxl,
+  },
   content: {
     flex: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.xl,
+    gap: Spacing.lg,
   },
   iconContainer: {
     width: 160,
@@ -326,6 +353,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   footer: {
+    width: '100%',
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.lg,
     gap: Spacing.md,

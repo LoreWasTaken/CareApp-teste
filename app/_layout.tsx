@@ -18,22 +18,27 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inOnboarding = segments[0] === 'onboarding';
-    const inLogin = segments[0] === 'login';
+    const rootSegment = segments?.[0];
+    const inOnboarding = rootSegment === 'onboarding';
+    const inLogin = rootSegment === 'login';
 
-    if (!appData.onboardingCompleted && !inOnboarding) {
-      console.log('[RootLayout] Redirecting to onboarding');
-      router.replace('/onboarding');
+    if (!appData.onboardingCompleted) {
+      if (!inOnboarding) {
+        console.log('[RootLayout] Redirecting to onboarding');
+        router.replace('/onboarding');
+      }
       return;
     }
 
-    if (appData.onboardingCompleted && !isAuthenticated && !inLogin) {
-      console.log('[RootLayout] Redirecting to login');
-      router.replace('/login');
+    if (!isAuthenticated) {
+      if (!inLogin) {
+        console.log('[RootLayout] Redirecting to login');
+        router.replace('/login');
+      }
       return;
     }
 
-    if (isAuthenticated && (inOnboarding || inLogin)) {
+    if (inOnboarding || inLogin) {
       console.log('[RootLayout] Redirecting to home');
       router.replace('/');
     }
