@@ -7,6 +7,8 @@ const STORAGE_KEY = 'careapp_data';
 
 const defaultUserSettings: UserSettings = {
   name: '',
+  email: '',
+  password: '',
   language: 'en',
   highContrast: false,
   largeText: false,
@@ -34,6 +36,7 @@ const defaultAppData: AppData = {
 export const [AppProvider, useApp] = createContextHook(() => {
   const [appData, setAppData] = useState<AppData>(defaultAppData);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
     loadData();
@@ -44,13 +47,22 @@ export const [AppProvider, useApp] = createContextHook(() => {
       console.log('[AppContext] Loading data from AsyncStorage');
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as AppData;
+        const parsed = JSON.parse(stored) as Partial<AppData>;
+        const mergedUser: UserSettings = {
+          ...defaultUserSettings,
+          ...(parsed.user ?? {}),
+        };
+        const merged: AppData = {
+          ...defaultAppData,
+          ...parsed,
+          user: mergedUser,
+        };
         console.log('[AppContext] Data loaded successfully', { 
-          medicationsCount: parsed.medications.length,
-          historyCount: parsed.history.length,
-          onboardingCompleted: parsed.onboardingCompleted 
+          medicationsCount: merged.medications.length,
+          historyCount: merged.history.length,
+          onboardingCompleted: merged.onboardingCompleted 
         });
-        setAppData(parsed);
+        setAppData(merged);
       } else {
         console.log('[AppContext] No stored data found, using defaults');
       }
@@ -58,6 +70,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       console.error('[AppContext] Error loading data:', error);
     } finally {
       setIsLoading(false);
+      setIsAuthenticated(false);
     }
   };
 
@@ -72,14 +85,15 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   };
 
-  const completeOnboarding = useCallback((userName: string) => {
-    console.log('[AppContext] Completing onboarding', { userName });
+  const completeOnboarding = useCallback(({ name, email, password }: { name?: string; email: string; password: string }) => {
+    console.log('[AppContext] Completing onboarding', { email });
     const updated: AppData = {
       ...appData,
-      user: { ...appData.user, name: userName },
+      user: { ...appData.user, name: name ?? '', email, password },
       onboardingCompleted: true,
     };
     saveData(updated);
+    setIsAuthenticated(true);
   }, [appData]);
 
   const addMedication = useCallback((medication: Omit<Medication, 'id' | 'createdAt'>) => {
@@ -197,6 +211,38 @@ export const [AppProvider, useApp] = createContextHook(() => {
     saveData(updated);
   }, [appData]);
 
+  const login = useCallback((email: string, password: string) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const storedEmail = appData.user.email.trim().toLowerCase();
+    const storedPassword = appData.user.password;
+
+    const success = normalizedEmail === storedEmail && password === storedPassword;
+    if (success) {
+      console.log('[AppContext] Login successful');
+      setIsAuthenticated(true);
+    } else {
+      console.log('[AppContext] Login failed');
+    }
+    return success;
+  }, [appData.user.email, appData.user.password]);
+
+  const logout = useCallback(() => {
+    console.log('[AppContext] Logging out');
+    setIsAuthenticated(false);
+  }, []);
+
+  const clearData = useCallback(async () => {
+    console.log('[AppContext] Clearing stored data');
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('[AppContext] Error clearing data:', error);
+    } finally {
+      setAppData(defaultAppData);
+      setIsAuthenticated(false);
+    }
+  }, []);
+
   const updateDeviceStatus = useCallback((status: Partial<AppData['deviceStatus']>) => {
     console.log('[AppContext] Updating device status', status);
     const updated: AppData = {
@@ -250,6 +296,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   return useMemo(() => ({
     appData,
     isLoading,
+    isAuthenticated,
     completeOnboarding,
     addMedication,
     updateMedication,
@@ -257,12 +304,16 @@ export const [AppProvider, useApp] = createContextHook(() => {
     markDoseTaken,
     markDoseSkipped,
     updateSettings,
+    login,
+    logout,
+    clearData,
     updateDeviceStatus,
     getTodaySchedule,
     getNextDose,
   }), [
     appData,
     isLoading,
+    isAuthenticated,
     completeOnboarding,
     addMedication,
     updateMedication,
@@ -270,6 +321,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
     markDoseTaken,
     markDoseSkipped,
     updateSettings,
+    login,
+    logout,
+    clearData,
     updateDeviceStatus,
     getTodaySchedule,
     getNextDose,

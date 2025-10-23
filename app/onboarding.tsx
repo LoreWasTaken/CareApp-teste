@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Platform, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,9 +28,15 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const { completeOnboarding } = useApp();
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [userName, setUserName] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const emailInputRef = useRef<TextInput | null>(null);
+  const passwordInputRef = useRef<TextInput | null>(null);
+  const confirmPasswordInputRef = useRef<TextInput | null>(null);
 
   useEffect(() => {
     Animated.parallel([
@@ -70,9 +76,37 @@ export default function OnboardingScreen() {
   };
 
   const handleComplete = () => {
-    console.log('[Onboarding] Completing with name:', userName);
-    const name = userName.trim() || 'User';
-    completeOnboarding(name);
+    const trimmedName = name.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const sanitizedPassword = password.trim();
+    const sanitizedConfirm = confirmPassword.trim();
+
+    if (!normalizedEmail || !sanitizedPassword || !sanitizedConfirm) {
+      Alert.alert(
+        'Missing information',
+        'Please fill out email, password, and password confirmation.'
+      );
+      return;
+    }
+
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(normalizedEmail)) {
+      Alert.alert('Invalid email', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (sanitizedPassword.length < 6) {
+      Alert.alert('Weak password', 'Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (sanitizedPassword !== sanitizedConfirm) {
+      Alert.alert('Passwords do not match', 'Please make sure both passwords match.');
+      return;
+    }
+
+    console.log('[Onboarding] Completing login for email:', normalizedEmail);
+    completeOnboarding({ name: trimmedName, email: normalizedEmail, password: sanitizedPassword });
     router.replace('/');
   };
 
@@ -82,85 +116,138 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.content}>
-        <Animated.View 
-          style={[
-            styles.iconContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+      >
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+          showsVerticalScrollIndicator={false}
         >
-          <Icon size={80} color={Colors.primary} strokeWidth={1.5} />
-        </Animated.View>
-
-        <Animated.View style={{ opacity: fadeAnim }}>
-          <Text style={styles.title}>{currentStepData.title}</Text>
-          <Text style={styles.description}>{currentStepData.description}</Text>
-        </Animated.View>
-
-        {isLastStep && (
-          <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
-            <Text style={styles.inputLabel}>What should we call you?</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your name (optional)"
-              placeholderTextColor={Colors.textLight}
-              value={userName}
-              onChangeText={setUserName}
-              autoCapitalize="words"
-              returnKeyType="done"
-              testID="onboarding-name-input"
-            />
-          </Animated.View>
-        )}
-
-        <View style={styles.progressContainer}>
-          {STEPS.map((_, index) => (
-            <View
-              key={index}
+          <View style={styles.content}>
+            <Animated.View 
               style={[
-                styles.progressDot,
-                index === currentStep && styles.progressDotActive,
+                styles.iconContainer,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }],
+                },
               ]}
-            />
-          ))}
-        </View>
-      </View>
+            >
+              <Icon size={80} color={Colors.primary} strokeWidth={1.5} />
+            </Animated.View>
 
-      <View style={styles.footer}>
-        {isLastStep ? (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleComplete}
-            activeOpacity={0.8}
-            testID="onboarding-complete-button"
-          >
-            <Text style={styles.buttonText}>Get Started</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleNext}
-            activeOpacity={0.8}
-            testID="onboarding-next-button"
-          >
-            <Text style={styles.buttonText}>Continue</Text>
-          </TouchableOpacity>
-        )}
+            <Animated.View style={{ opacity: fadeAnim }}>
+              <Text style={styles.title}>{currentStepData.title}</Text>
+              <Text style={styles.description}>{currentStepData.description}</Text>
+            </Animated.View>
 
-        {!isLastStep && (
-          <TouchableOpacity
-            style={styles.skipButton}
-            onPress={handleComplete}
-            activeOpacity={0.6}
-            testID="onboarding-skip-button"
-          >
-            <Text style={styles.skipButtonText}>Skip</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+            {isLastStep && (
+              <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
+                <Text style={styles.inputLabel}>Create your CareApp account</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Name (optional)"
+                  placeholderTextColor={Colors.textLight}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                  returnKeyType="next"
+                  onSubmitEditing={() => emailInputRef.current?.focus()}
+                  blurOnSubmit={false}
+                  testID="onboarding-name-input"
+                />
+                <TextInput
+                  ref={emailInputRef}
+                  style={styles.input}
+                  placeholder="you@example.com"
+                  placeholderTextColor={Colors.textLight}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  textContentType="emailAddress"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordInputRef.current?.focus()}
+                  blurOnSubmit={false}
+                  testID="onboarding-email-input"
+                />
+                <Text style={[styles.inputLabel, styles.passwordLabel]}>Password</Text>
+                <TextInput
+                  ref={passwordInputRef}
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  placeholderTextColor={Colors.textLight}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoComplete="password"
+                  textContentType="password"
+                  returnKeyType="next"
+                  onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
+                  testID="onboarding-password-input"
+                />
+                <Text style={[styles.inputLabel, styles.passwordLabel]}>Confirm Password</Text>
+                <TextInput
+                  ref={confirmPasswordInputRef}
+                  style={styles.input}
+                  placeholder="Re-enter your password"
+                  placeholderTextColor={Colors.textLight}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoComplete="password"
+                  textContentType="password"
+                  returnKeyType="done"
+                  onSubmitEditing={handleComplete}
+                  testID="onboarding-confirm-password-input"
+                />
+              </Animated.View>
+            )}
+
+            <View style={styles.progressContainer}>
+              {STEPS.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.progressDot,
+                    index === currentStep && styles.progressDotActive,
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            {isLastStep ? (
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleComplete}
+                activeOpacity={0.8}
+                testID="onboarding-complete-button"
+              >
+                <Text style={styles.buttonText}>Register</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleNext}
+                activeOpacity={0.8}
+                testID="onboarding-next-button"
+              >
+                <Text style={styles.buttonText}>Continue</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -170,11 +257,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  flex: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: Spacing.xxl,
+  },
   content: {
     flex: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.xl,
+    gap: Spacing.lg,
   },
   iconContainer: {
     width: 160,
@@ -216,12 +314,16 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: '100%',
     marginTop: Spacing.xxl,
+    gap: Spacing.md,
   },
   inputLabel: {
     fontSize: FontSizes.md,
     color: Colors.text,
     fontWeight: '600' as const,
     marginBottom: Spacing.sm,
+  },
+  passwordLabel: {
+    marginTop: Spacing.md,
   },
   input: {
     backgroundColor: Colors.surface,
@@ -251,6 +353,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   footer: {
+    width: '100%',
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.lg,
     gap: Spacing.md,
@@ -281,15 +384,5 @@ const styles = StyleSheet.create({
     color: Colors.surface,
     fontSize: FontSizes.xl,
     fontWeight: '600' as const,
-  },
-  skipButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-  },
-  skipButtonText: {
-    color: Colors.textSecondary,
-    fontSize: FontSizes.md,
-    fontWeight: '500' as const,
   },
 });
