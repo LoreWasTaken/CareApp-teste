@@ -7,6 +7,8 @@ const STORAGE_KEY = 'careapp_data';
 
 const defaultUserSettings: UserSettings = {
   name: '',
+  email: '',
+  password: '',
   language: 'en',
   highContrast: false,
   largeText: false,
@@ -44,13 +46,22 @@ export const [AppProvider, useApp] = createContextHook(() => {
       console.log('[AppContext] Loading data from AsyncStorage');
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as AppData;
+        const parsed = JSON.parse(stored) as Partial<AppData>;
+        const mergedUser: UserSettings = {
+          ...defaultUserSettings,
+          ...(parsed.user ?? {}),
+        };
+        const merged: AppData = {
+          ...defaultAppData,
+          ...parsed,
+          user: mergedUser,
+        };
         console.log('[AppContext] Data loaded successfully', { 
-          medicationsCount: parsed.medications.length,
-          historyCount: parsed.history.length,
-          onboardingCompleted: parsed.onboardingCompleted 
+          medicationsCount: merged.medications.length,
+          historyCount: merged.history.length,
+          onboardingCompleted: merged.onboardingCompleted 
         });
-        setAppData(parsed);
+        setAppData(merged);
       } else {
         console.log('[AppContext] No stored data found, using defaults');
       }
@@ -72,11 +83,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   };
 
-  const completeOnboarding = useCallback((userName: string) => {
-    console.log('[AppContext] Completing onboarding', { userName });
+  const completeOnboarding = useCallback(({ email, password }: { email: string; password: string }) => {
+    console.log('[AppContext] Completing onboarding', { email });
     const updated: AppData = {
       ...appData,
-      user: { ...appData.user, name: userName },
+      user: { ...appData.user, email, password },
       onboardingCompleted: true,
     };
     saveData(updated);

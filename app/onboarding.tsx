@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Platform, Alert } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,9 +28,11 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const { completeOnboarding } = useApp();
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [userName, setUserName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const passwordInputRef = useRef<TextInput | null>(null);
 
   useEffect(() => {
     Animated.parallel([
@@ -69,10 +71,27 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleComplete = () => {
-    console.log('[Onboarding] Completing with name:', userName);
-    const name = userName.trim() || 'User';
-    completeOnboarding(name);
+  const handleComplete = (skip: boolean = false) => {
+    if (skip) {
+      console.log('[Onboarding] Skipping login, continuing as guest');
+      completeOnboarding({ email: '', password: '' });
+      router.replace('/');
+      return;
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const sanitizedPassword = password.trim();
+
+    if (!normalizedEmail || !sanitizedPassword) {
+      Alert.alert(
+        'Missing information',
+        'Please enter both your email and password to continue.'
+      );
+      return;
+    }
+
+    console.log('[Onboarding] Completing login for email:', normalizedEmail);
+    completeOnboarding({ email: normalizedEmail, password: sanitizedPassword });
     router.replace('/');
   };
 
@@ -102,16 +121,37 @@ export default function OnboardingScreen() {
 
         {isLastStep && (
           <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
-            <Text style={styles.inputLabel}>What should we call you?</Text>
+            <Text style={styles.inputLabel}>Log in to continue</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your name (optional)"
+              placeholder="you@example.com"
               placeholderTextColor={Colors.textLight}
-              value={userName}
-              onChangeText={setUserName}
-              autoCapitalize="words"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
+              blurOnSubmit={false}
+              testID="onboarding-email-input"
+            />
+            <Text style={[styles.inputLabel, styles.passwordLabel]}>Password</Text>
+            <TextInput
+              ref={passwordInputRef}
+              style={styles.input}
+              placeholder="Enter your password"
+              placeholderTextColor={Colors.textLight}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              autoComplete="password"
+              textContentType="password"
               returnKeyType="done"
-              testID="onboarding-name-input"
+              onSubmitEditing={() => handleComplete()}
+              testID="onboarding-password-input"
             />
           </Animated.View>
         )}
@@ -137,7 +177,7 @@ export default function OnboardingScreen() {
             activeOpacity={0.8}
             testID="onboarding-complete-button"
           >
-            <Text style={styles.buttonText}>Get Started</Text>
+            <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -153,7 +193,7 @@ export default function OnboardingScreen() {
         {!isLastStep && (
           <TouchableOpacity
             style={styles.skipButton}
-            onPress={handleComplete}
+            onPress={() => handleComplete(true)}
             activeOpacity={0.6}
             testID="onboarding-skip-button"
           >
@@ -216,12 +256,16 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: '100%',
     marginTop: Spacing.xxl,
+    gap: Spacing.md,
   },
   inputLabel: {
     fontSize: FontSizes.md,
     color: Colors.text,
     fontWeight: '600' as const,
     marginBottom: Spacing.sm,
+  },
+  passwordLabel: {
+    marginTop: Spacing.md,
   },
   input: {
     backgroundColor: Colors.surface,

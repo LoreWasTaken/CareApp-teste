@@ -21,6 +21,8 @@ export interface DoseHistory {
 
 export interface UserSettings {
   name: string;
+  email: string;
+  password: string;
   language: 'en' | 'pt';
   highContrast: boolean;
   largeText: boolean;
