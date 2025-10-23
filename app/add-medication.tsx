@@ -48,7 +48,42 @@ export default function AddMedicationScreen() {
       return;
     }
 
-    const sortedTimes = [...times].sort();
+    const formattedTimes: string[] = [];
+    for (const original of times) {
+      const sanitized = original.trim();
+      const match = sanitized.match(/^(\d{1,2}):(\d{2})$/);
+      if (!match) {
+        Alert.alert(
+          'Invalid time',
+          `Use 24-hour format HH:MM between 00:00 and 23:59. Check "${sanitized || 'empty value'}".`
+        );
+        return;
+      }
+
+      const hours = parseInt(match[1], 10);
+      const minutes = parseInt(match[2], 10);
+
+      if (Number.isNaN(hours) || Number.isNaN(minutes) || hours > 23 || minutes > 59) {
+        Alert.alert(
+          'Invalid time',
+          `Use 24-hour format HH:MM between 00:00 and 23:59. Check "${sanitized}".`
+        );
+        return;
+      }
+
+      const normalized = `${hours.toString().padStart(2, '0')}:${minutes
+        .toString()
+        .padStart(2, '0')}`;
+      formattedTimes.push(normalized);
+    }
+
+    const uniqueTimes = Array.from(new Set(formattedTimes));
+    if (uniqueTimes.length !== formattedTimes.length) {
+      Alert.alert('Duplicate time', 'Each time entry should be unique.');
+      return;
+    }
+
+    const sortedTimes = [...uniqueTimes].sort();
     
     addMedication({
       name: medicationName.trim(),

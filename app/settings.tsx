@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Platform, Alert } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
-import { ChevronLeft, User, Palette, Bell, Volume2, Vibrate, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, User, Palette, Bell, Volume2, Vibrate, Trash2, Database } from 'lucide-react-native';
 import { Colors, Spacing, BorderRadius, FontSizes } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
 
@@ -36,10 +36,12 @@ export default function SettingsScreen() {
             </View>
             
             <View style={styles.settingItem}>
-              <Text style={[styles.settingLabel, { fontSize }]}>Name</Text>
-              <Text style={[styles.settingValue, { fontSize: fontSize - 2 }]}>
-                {user.name || 'Not set'}
-              </Text>
+              <View style={styles.settingItemContent}>
+                <Text style={[styles.settingLabel, { fontSize }]}>Name</Text>
+                <Text style={[styles.settingValue, { fontSize: fontSize - 2 }]}>
+                  {user.name || 'Not set'}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -57,6 +59,7 @@ export default function SettingsScreen() {
                 </Text>
               </View>
               <Switch
+                style={styles.toggle}
                 value={user.highContrast}
                 onValueChange={(value) => updateSettings({ highContrast: value })}
                 trackColor={{ false: Colors.disabled, true: Colors.primary }}
@@ -73,6 +76,7 @@ export default function SettingsScreen() {
                 </Text>
               </View>
               <Switch
+                style={styles.toggle}
                 value={user.largeText}
                 onValueChange={(value) => updateSettings({ largeText: value })}
                 trackColor={{ false: Colors.disabled, true: Colors.primary }}
@@ -90,10 +94,13 @@ export default function SettingsScreen() {
 
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <Volume2 size={20} color={Colors.textSecondary} />
-                <Text style={[styles.settingLabel, { fontSize, marginLeft: Spacing.sm }]}>Sound</Text>
+                <View style={styles.settingInfoRow}>
+                  <Volume2 size={20} color={Colors.textSecondary} />
+                  <Text style={[styles.settingLabel, { fontSize }]}>Sound</Text>
+                </View>
               </View>
               <Switch
+                style={styles.toggle}
                 value={user.soundEnabled}
                 onValueChange={(value) => updateSettings({ soundEnabled: value })}
                 trackColor={{ false: Colors.disabled, true: Colors.primary }}
@@ -104,10 +111,13 @@ export default function SettingsScreen() {
 
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <Vibrate size={20} color={Colors.textSecondary} />
-                <Text style={[styles.settingLabel, { fontSize, marginLeft: Spacing.sm }]}>Vibration</Text>
+                <View style={styles.settingInfoRow}>
+                  <Vibrate size={20} color={Colors.textSecondary} />
+                  <Text style={[styles.settingLabel, { fontSize }]}>Vibration</Text>
+                </View>
               </View>
               <Switch
+                style={styles.toggle}
                 value={user.vibrationEnabled}
                 onValueChange={(value) => updateSettings({ vibrationEnabled: value })}
                 trackColor={{ false: Colors.disabled, true: Colors.primary }}
@@ -115,6 +125,18 @@ export default function SettingsScreen() {
                 testID="vibration-switch"
               />
             </View>
+          </View>
+
+          <View style={styles.section}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              activeOpacity={0.8}
+              onPress={() => router.push('/debug-storage')}
+              testID="debug-storage-button"
+            >
+              <Database size={20} color={Colors.primary} />
+              <Text style={[styles.secondaryButtonText, { fontSize }]}>View Stored Data</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
@@ -210,18 +232,28 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     padding: Spacing.lg,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
     marginBottom: Spacing.sm,
+    gap: Spacing.md,
+  },
+  settingItemContent: {
+    flex: 1,
   },
   settingInfo: {
     flex: 1,
+    alignItems: 'flex-start',
+    gap: Spacing.xs,
+  },
+  settingInfoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.sm,
   },
   settingLabel: {
     color: Colors.text,
     fontWeight: '600' as const,
+    flexShrink: 1,
   },
   settingValue: {
     color: Colors.textSecondary,
@@ -229,6 +261,26 @@ const styles = StyleSheet.create({
   settingDescription: {
     color: Colors.textSecondary,
     marginTop: Spacing.xs - 2,
+    flexShrink: 1,
+  },
+  toggle: {
+    alignSelf: 'center',
+    marginLeft: Spacing.sm,
+  },
+  secondaryButton: {
+    backgroundColor: Colors.primary + '12',
+    borderRadius: BorderRadius.md,
+    padding: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.primary + '24',
+  },
+  secondaryButtonText: {
+    color: Colors.primary,
+    fontWeight: '600' as const,
   },
   dangerButton: {
     backgroundColor: Colors.error + '10',

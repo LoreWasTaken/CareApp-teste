@@ -51,6 +51,7 @@ function RootLayoutNav() {
       <Stack.Screen name="login" />
       <Stack.Screen name="settings" options={{ presentation: "modal" }} />
       <Stack.Screen name="add-medication" options={{ presentation: "modal" }} />
+      <Stack.Screen name="debug-storage" options={{ presentation: "modal" }} />
     </Stack>
   );
 }
