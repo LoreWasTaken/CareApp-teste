@@ -1,17 +1,20 @@
-import { useState, useRef } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Lock } from 'lucide-react-native';
-import { Colors, Spacing, BorderRadius, FontSizes } from '@/constants/colors';
+import { Spacing, BorderRadius, FontSizes } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import type { ThemeColors } from '@/constants/colors';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, appData } = useApp();
+  const { login, appData, theme } = useApp();
   const [email, setEmail] = useState(appData.user.email);
   const [password, setPassword] = useState('');
   const passwordInputRef = useRef<TextInput | null>(null);
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const colors = theme;
 
   const handleSubmit = () => {
     const normalizedEmail = email.trim();
@@ -38,7 +41,7 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
         <View style={styles.iconContainer}>
-          <Lock size={72} color={Colors.primary} strokeWidth={1.5} />
+          <Lock size={72} color={colors.primary} strokeWidth={1.5} />
         </View>
         <Text style={styles.title}>Welcome back</Text>
         <Text style={styles.subtitle}>Sign in with the credentials you created during setup.</Text>
@@ -48,7 +51,7 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="you@example.com"
-            placeholderTextColor={Colors.textLight}
+            placeholderTextColor={colors.textLight}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -66,7 +69,7 @@ export default function LoginScreen() {
             ref={passwordInputRef}
             style={styles.input}
             placeholder="Enter your password"
-            placeholderTextColor={Colors.textLight}
+            placeholderTextColor={colors.textLight}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -91,104 +94,105 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.xl,
-    gap: Spacing.lg,
-  },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
-        shadowRadius: 18,
-      },
-      android: {
-        elevation: 6,
-      },
-      web: {
-        boxShadow: '0 6px 18px rgba(74, 144, 226, 0.2)',
-      },
-    }),
-  },
-  title: {
-    fontSize: FontSizes.xxxl,
-    fontWeight: '700' as const,
-    color: Colors.text,
-  },
-  subtitle: {
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.md,
-  },
-  form: {
-    width: '100%',
-    gap: Spacing.md,
-  },
-  label: {
-    fontSize: FontSizes.md,
-    color: Colors.text,
-    fontWeight: '600' as const,
-  },
-  input: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    fontSize: FontSizes.lg,
-    color: Colors.text,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  button: {
-    width: '100%',
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Spacing.xl,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-      web: {
-        boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
-      },
-    }),
-  },
-  buttonText: {
-    color: Colors.surface,
-    fontSize: FontSizes.xl,
-    fontWeight: '600' as const,
-  },
-  linkButton: {
-    paddingVertical: Spacing.sm,
-  },
-  linkText: {
-    color: Colors.textSecondary,
-    fontSize: FontSizes.md,
-    fontWeight: '500' as const,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: Spacing.xl,
+      gap: Spacing.lg,
+    },
+    iconContainer: {
+      width: 120,
+      height: 120,
+      borderRadius: BorderRadius.full,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.2,
+          shadowRadius: 18,
+        },
+        android: {
+          elevation: 6,
+        },
+        web: {
+          boxShadow: '0 6px 18px rgba(74, 144, 226, 0.2)',
+        },
+      }),
+    },
+    title: {
+      fontSize: FontSizes.xxxl,
+      fontWeight: '700' as const,
+      color: colors.text,
+    },
+    subtitle: {
+      fontSize: FontSizes.md,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      paddingHorizontal: Spacing.md,
+    },
+    form: {
+      width: '100%',
+      gap: Spacing.md,
+    },
+    label: {
+      fontSize: FontSizes.md,
+      color: colors.text,
+      fontWeight: '600' as const,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.md,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.lg,
+      fontSize: FontSizes.lg,
+      color: colors.text,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    button: {
+      width: '100%',
+      backgroundColor: colors.primary,
+      borderRadius: BorderRadius.lg,
+      paddingVertical: Spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: Spacing.xl,
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.25,
+          shadowRadius: 12,
+        },
+        android: {
+          elevation: 4,
+        },
+        web: {
+          boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
+        },
+      }),
+    },
+    buttonText: {
+      color: colors.surface,
+      fontSize: FontSizes.xl,
+      fontWeight: '600' as const,
+    },
+    linkButton: {
+      paddingVertical: Spacing.sm,
+    },
+    linkText: {
+      color: colors.textSecondary,
+      fontSize: FontSizes.md,
+      fontWeight: '500' as const,
+    },
+  });

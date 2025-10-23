@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Slot, useRouter, useSegments } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -11,15 +11,14 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   const { appData, isLoading, isAuthenticated } = useApp();
-  const segments = useSegments();
+  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading) return;
 
-    const rootSegment = segments?.[0];
-    const inOnboarding = rootSegment === 'onboarding';
-    const inLogin = rootSegment === 'login';
+    const inOnboarding = pathname === '/onboarding';
+    const inLogin = pathname === '/login';
 
     if (!appData.onboardingCompleted) {
       if (!inOnboarding) {
@@ -41,7 +40,7 @@ function RootLayoutNav() {
       console.log('[RootLayout] Redirecting to home');
       router.replace('/');
     }
-  }, [appData.onboardingCompleted, isAuthenticated, isLoading, segments]);
+  }, [appData.onboardingCompleted, isAuthenticated, isLoading, pathname, router]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -56,11 +55,17 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    SplashScreen.hideAsync().catch(() => {
+      /* noop */
+    });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AppProvider>
-          <NavigationHandler />
+          <RootLayoutNav />
         </AppProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>

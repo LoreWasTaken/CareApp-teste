@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Platform, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Pill, Bluetooth, Bell } from 'lucide-react-native';
-import { Colors, Spacing, BorderRadius, FontSizes } from '@/constants/colors';
+import { Spacing, BorderRadius, FontSizes } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import type { ThemeColors } from '@/constants/colors';
 
 const STEPS = [
   {
@@ -26,7 +27,7 @@ const STEPS = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { completeOnboarding } = useApp();
+  const { completeOnboarding, theme } = useApp();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
@@ -37,6 +38,8 @@ export default function OnboardingScreen() {
   const emailInputRef = useRef<TextInput | null>(null);
   const passwordInputRef = useRef<TextInput | null>(null);
   const confirmPasswordInputRef = useRef<TextInput | null>(null);
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const colors = theme;
 
   useEffect(() => {
     Animated.parallel([
@@ -138,7 +141,7 @@ export default function OnboardingScreen() {
                 },
               ]}
             >
-              <Icon size={80} color={Colors.primary} strokeWidth={1.5} />
+              <Icon size={80} color={colors.primary} strokeWidth={1.5} />
             </Animated.View>
 
             <Animated.View style={{ opacity: fadeAnim }}>
@@ -152,7 +155,7 @@ export default function OnboardingScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Name (optional)"
-                  placeholderTextColor={Colors.textLight}
+                  placeholderTextColor={colors.textLight}
                   value={name}
                   onChangeText={setName}
                   autoCapitalize="words"
@@ -165,7 +168,7 @@ export default function OnboardingScreen() {
                   ref={emailInputRef}
                   style={styles.input}
                   placeholder="you@example.com"
-                  placeholderTextColor={Colors.textLight}
+                  placeholderTextColor={colors.textLight}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -182,7 +185,7 @@ export default function OnboardingScreen() {
                   ref={passwordInputRef}
                   style={styles.input}
                   placeholder="Enter your password"
-                  placeholderTextColor={Colors.textLight}
+                  placeholderTextColor={colors.textLight}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
@@ -198,7 +201,7 @@ export default function OnboardingScreen() {
                   ref={confirmPasswordInputRef}
                   style={styles.input}
                   placeholder="Re-enter your password"
-                  placeholderTextColor={Colors.textLight}
+                  placeholderTextColor={colors.textLight}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry
@@ -252,137 +255,138 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: Spacing.xxl,
-  },
-  content: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.xl,
-    gap: Spacing.lg,
-  },
-  iconContainer: {
-    width: 160,
-    height: 160,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.xxl,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.15,
-        shadowRadius: 24,
-      },
-      android: {
-        elevation: 8,
-      },
-      web: {
-        boxShadow: '0 8px 24px rgba(74, 144, 226, 0.15)',
-      },
-    }),
-  },
-  title: {
-    fontSize: FontSizes.xxxl,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: Spacing.md,
-  },
-  description: {
-    fontSize: FontSizes.lg,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 26,
-    paddingHorizontal: Spacing.md,
-  },
-  inputContainer: {
-    width: '100%',
-    marginTop: Spacing.xxl,
-    gap: Spacing.md,
-  },
-  inputLabel: {
-    fontSize: FontSizes.md,
-    color: Colors.text,
-    fontWeight: '600' as const,
-    marginBottom: Spacing.sm,
-  },
-  passwordLabel: {
-    marginTop: Spacing.md,
-  },
-  input: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    fontSize: FontSizes.lg,
-    color: Colors.text,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Spacing.xxl,
-    gap: Spacing.sm,
-  },
-  progressDot: {
-    width: 8,
-    height: 8,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.border,
-  },
-  progressDotActive: {
-    width: 24,
-    backgroundColor: Colors.primary,
-  },
-  footer: {
-    width: '100%',
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.lg,
-    gap: Spacing.md,
-  },
-  button: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-      web: {
-        boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
-      },
-    }),
-  },
-  buttonText: {
-    color: Colors.surface,
-    fontSize: FontSizes.xl,
-    fontWeight: '600' as const,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    flex: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: Spacing.xxl,
+    },
+    content: {
+      flex: 1,
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: Spacing.xl,
+      gap: Spacing.lg,
+    },
+    iconContainer: {
+      width: 160,
+      height: 160,
+      borderRadius: BorderRadius.full,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: Spacing.xxl,
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.15,
+          shadowRadius: 24,
+        },
+        android: {
+          elevation: 8,
+        },
+        web: {
+          boxShadow: '0 8px 24px rgba(74, 144, 226, 0.15)',
+        },
+      }),
+    },
+    title: {
+      fontSize: FontSizes.xxxl,
+      fontWeight: '700' as const,
+      color: colors.text,
+      textAlign: 'center',
+      marginBottom: Spacing.md,
+    },
+    description: {
+      fontSize: FontSizes.lg,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 26,
+      paddingHorizontal: Spacing.md,
+    },
+    inputContainer: {
+      width: '100%',
+      marginTop: Spacing.xxl,
+      gap: Spacing.md,
+    },
+    inputLabel: {
+      fontSize: FontSizes.md,
+      color: colors.text,
+      fontWeight: '600' as const,
+      marginBottom: Spacing.sm,
+    },
+    passwordLabel: {
+      marginTop: Spacing.md,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.md,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.lg,
+      fontSize: FontSizes.lg,
+      color: colors.text,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    progressContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: Spacing.xxl,
+      gap: Spacing.sm,
+    },
+    progressDot: {
+      width: 8,
+      height: 8,
+      borderRadius: BorderRadius.full,
+      backgroundColor: colors.border,
+    },
+    progressDotActive: {
+      width: 24,
+      backgroundColor: colors.primary,
+    },
+    footer: {
+      width: '100%',
+      paddingHorizontal: Spacing.xl,
+      paddingBottom: Spacing.lg,
+      gap: Spacing.md,
+    },
+    button: {
+      backgroundColor: colors.primary,
+      borderRadius: BorderRadius.lg,
+      paddingVertical: Spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 56,
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+        },
+        android: {
+          elevation: 4,
+        },
+        web: {
+          boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
+        },
+      }),
+    },
+    buttonText: {
+      color: colors.surface,
+      fontSize: FontSizes.xl,
+      fontWeight: '600' as const,
+    },
+  });

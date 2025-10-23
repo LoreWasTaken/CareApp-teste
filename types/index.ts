@@ -26,6 +26,7 @@ export interface UserSettings {
   language: 'en' | 'pt';
   highContrast: boolean;
   largeText: boolean;
+  darkMode: boolean;
   notificationsEnabled: boolean;
   soundEnabled: boolean;
   vibrationEnabled: boolean;

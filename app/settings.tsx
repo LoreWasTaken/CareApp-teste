@@ -1,13 +1,17 @@
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Platform, Alert } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { ChevronLeft, User, Palette, Bell, Volume2, Vibrate, Trash2, Database } from 'lucide-react-native';
-import { Colors, Spacing, BorderRadius, FontSizes } from '@/constants/colors';
+import { Spacing, BorderRadius, FontSizes } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import type { ThemeColors } from '@/constants/colors';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { appData, updateSettings, clearData } = useApp();
+  const { appData, updateSettings, clearData, theme } = useApp();
   const { user } = appData;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const colors = theme;
   
   const fontSize = user.largeText ? FontSizes.xl : FontSizes.lg;
 
@@ -22,7 +26,7 @@ export default function SettingsScreen() {
             activeOpacity={0.8}
             testID="back-button"
           >
-            <ChevronLeft size={28} color={Colors.text} />
+            <ChevronLeft size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { fontSize: fontSize + 4 }]}>Settings</Text>
           <View style={{ width: 48 }} />
@@ -31,7 +35,7 @@ export default function SettingsScreen() {
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <User size={20} color={Colors.textSecondary} />
+              <User size={20} color={colors.textSecondary} />
               <Text style={[styles.sectionTitle, { fontSize }]}>Profile</Text>
             </View>
             
@@ -47,7 +51,7 @@ export default function SettingsScreen() {
 
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Palette size={20} color={Colors.textSecondary} />
+              <Palette size={20} color={colors.textSecondary} />
               <Text style={[styles.sectionTitle, { fontSize }]}>Accessibility</Text>
             </View>
 
@@ -62,8 +66,8 @@ export default function SettingsScreen() {
                 style={styles.toggle}
                 value={user.highContrast}
                 onValueChange={(value) => updateSettings({ highContrast: value })}
-                trackColor={{ false: Colors.disabled, true: Colors.primary }}
-                thumbColor={Colors.surface}
+                trackColor={{ false: colors.disabled, true: colors.primary }}
+                thumbColor={colors.surface}
                 testID="high-contrast-switch"
               />
             </View>
@@ -79,23 +83,40 @@ export default function SettingsScreen() {
                 style={styles.toggle}
                 value={user.largeText}
                 onValueChange={(value) => updateSettings({ largeText: value })}
-                trackColor={{ false: Colors.disabled, true: Colors.primary }}
-                thumbColor={Colors.surface}
+                trackColor={{ false: colors.disabled, true: colors.primary }}
+                thumbColor={colors.surface}
                 testID="large-text-switch"
+              />
+            </View>
+
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingLabel, { fontSize }]}>Dark Mode</Text>
+                <Text style={[styles.settingDescription, { fontSize: fontSize - 4 }]}>
+                  Reduce glare with a darker interface
+                </Text>
+              </View>
+              <Switch
+                style={styles.toggle}
+                value={user.darkMode}
+                onValueChange={(value) => updateSettings({ darkMode: value })}
+                trackColor={{ false: colors.disabled, true: colors.primary }}
+                thumbColor={colors.surface}
+                testID="dark-mode-switch"
               />
             </View>
           </View>
 
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Bell size={20} color={Colors.textSecondary} />
+              <Bell size={20} color={colors.textSecondary} />
               <Text style={[styles.sectionTitle, { fontSize }]}>Notifications</Text>
             </View>
 
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <View style={styles.settingInfoRow}>
-                  <Volume2 size={20} color={Colors.textSecondary} />
+                  <Volume2 size={20} color={colors.textSecondary} />
                   <Text style={[styles.settingLabel, { fontSize }]}>Sound</Text>
                 </View>
               </View>
@@ -103,8 +124,8 @@ export default function SettingsScreen() {
                 style={styles.toggle}
                 value={user.soundEnabled}
                 onValueChange={(value) => updateSettings({ soundEnabled: value })}
-                trackColor={{ false: Colors.disabled, true: Colors.primary }}
-                thumbColor={Colors.surface}
+                trackColor={{ false: colors.disabled, true: colors.primary }}
+                thumbColor={colors.surface}
                 testID="sound-switch"
               />
             </View>
@@ -112,7 +133,7 @@ export default function SettingsScreen() {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <View style={styles.settingInfoRow}>
-                  <Vibrate size={20} color={Colors.textSecondary} />
+                  <Vibrate size={20} color={colors.textSecondary} />
                   <Text style={[styles.settingLabel, { fontSize }]}>Vibration</Text>
                 </View>
               </View>
@@ -120,8 +141,8 @@ export default function SettingsScreen() {
                 style={styles.toggle}
                 value={user.vibrationEnabled}
                 onValueChange={(value) => updateSettings({ vibrationEnabled: value })}
-                trackColor={{ false: Colors.disabled, true: Colors.primary }}
-                thumbColor={Colors.surface}
+                trackColor={{ false: colors.disabled, true: colors.primary }}
+                thumbColor={colors.surface}
                 testID="vibration-switch"
               />
             </View>
@@ -134,7 +155,7 @@ export default function SettingsScreen() {
               onPress={() => router.push('/debug-storage')}
               testID="debug-storage-button"
             >
-              <Database size={20} color={Colors.primary} />
+              <Database size={20} color={colors.primary} />
               <Text style={[styles.secondaryButtonText, { fontSize }]}>View Stored Data</Text>
             </TouchableOpacity>
           </View>
@@ -162,7 +183,7 @@ export default function SettingsScreen() {
                 );
               }}
             >
-              <Trash2 size={20} color={Colors.error} />
+              <Trash2 size={20} color={colors.error} />
               <Text style={[styles.dangerButtonText, { fontSize }]}>Clear All Data</Text>
             </TouchableOpacity>
           </View>
@@ -181,129 +202,130 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Platform.OS === 'ios' ? 60 : Spacing.xl,
-    paddingBottom: Spacing.lg,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  backButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontWeight: '700' as const,
-    color: Colors.text,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: Spacing.xl,
-    paddingBottom: Spacing.xxl,
-  },
-  section: {
-    marginBottom: Spacing.xl,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  sectionTitle: {
-    fontWeight: '700' as const,
-    color: Colors.text,
-  },
-  settingItem: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-    gap: Spacing.md,
-  },
-  settingItemContent: {
-    flex: 1,
-  },
-  settingInfo: {
-    flex: 1,
-    alignItems: 'flex-start',
-    gap: Spacing.xs,
-  },
-  settingInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  settingLabel: {
-    color: Colors.text,
-    fontWeight: '600' as const,
-    flexShrink: 1,
-  },
-  settingValue: {
-    color: Colors.textSecondary,
-  },
-  settingDescription: {
-    color: Colors.textSecondary,
-    marginTop: Spacing.xs - 2,
-    flexShrink: 1,
-  },
-  toggle: {
-    alignSelf: 'center',
-    marginLeft: Spacing.sm,
-  },
-  secondaryButton: {
-    backgroundColor: Colors.primary + '12',
-    borderRadius: BorderRadius.md,
-    padding: Spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.primary + '24',
-  },
-  secondaryButtonText: {
-    color: Colors.primary,
-    fontWeight: '600' as const,
-  },
-  dangerButton: {
-    backgroundColor: Colors.error + '10',
-    borderRadius: BorderRadius.md,
-    padding: Spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.error + '30',
-  },
-  dangerButtonText: {
-    color: Colors.error,
-    fontWeight: '600' as const,
-  },
-  appInfo: {
-    alignItems: 'center',
-    marginTop: Spacing.xl,
-    gap: Spacing.xs,
-  },
-  appInfoText: {
-    color: Colors.textLight,
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.lg,
+      paddingTop: Platform.OS === 'ios' ? 60 : Spacing.xl,
+      paddingBottom: Spacing.lg,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    backButton: {
+      width: 48,
+      height: 48,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: {
+      fontWeight: '700' as const,
+      color: colors.text,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      padding: Spacing.xl,
+      paddingBottom: Spacing.xxl,
+    },
+    section: {
+      marginBottom: Spacing.xl,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      marginBottom: Spacing.md,
+    },
+    sectionTitle: {
+      fontWeight: '700' as const,
+      color: colors.text,
+    },
+    settingItem: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.md,
+      padding: Spacing.lg,
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.sm,
+      gap: Spacing.md,
+    },
+    settingItemContent: {
+      flex: 1,
+    },
+    settingInfo: {
+      flex: 1,
+      alignItems: 'flex-start',
+      gap: Spacing.xs,
+    },
+    settingInfoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+    },
+    settingLabel: {
+      color: colors.text,
+      fontWeight: '600' as const,
+      flexShrink: 1,
+    },
+    settingValue: {
+      color: colors.textSecondary,
+    },
+    settingDescription: {
+      color: colors.textSecondary,
+      marginTop: Spacing.xs - 2,
+      flexShrink: 1,
+    },
+    toggle: {
+      alignSelf: 'center',
+      marginLeft: Spacing.sm,
+    },
+    secondaryButton: {
+      backgroundColor: colors.primary + '12',
+      borderRadius: BorderRadius.md,
+      padding: Spacing.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.primary + '24',
+    },
+    secondaryButtonText: {
+      color: colors.primary,
+      fontWeight: '600' as const,
+    },
+    dangerButton: {
+      backgroundColor: colors.error + '10',
+      borderRadius: BorderRadius.md,
+      padding: Spacing.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.error + '30',
+    },
+    dangerButtonText: {
+      color: colors.error,
+      fontWeight: '600' as const,
+    },
+    appInfo: {
+      alignItems: 'center',
+      marginTop: Spacing.xl,
+      gap: Spacing.xs,
+    },
+    appInfoText: {
+      color: colors.textLight,
+      textAlign: 'center',
+    },
+  });

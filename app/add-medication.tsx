@@ -1,14 +1,17 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Platform, Alert } from 'react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter, Stack } from 'expo-router';
 import { ChevronLeft, Plus, X } from 'lucide-react-native';
-import { Colors, Spacing, BorderRadius, FontSizes } from '@/constants/colors';
+import { Spacing, BorderRadius, FontSizes } from '@/constants/colors';
 import { useApp } from '@/contexts/AppContext';
+import type { ThemeColors } from '@/constants/colors';
 
 export default function AddMedicationScreen() {
   const router = useRouter();
-  const { appData, addMedication } = useApp();
+  const { appData, addMedication, theme } = useApp();
   const { user } = appData;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const colors = theme;
   
   const [medicationName, setMedicationName] = useState<string>('');
   const [times, setTimes] = useState<string[]>(['08:00']);
@@ -108,7 +111,7 @@ export default function AddMedicationScreen() {
             activeOpacity={0.8}
             testID="back-button"
           >
-            <ChevronLeft size={28} color={Colors.text} />
+            <ChevronLeft size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { fontSize: fontSize + 4 }]}>Add Medication</Text>
           <View style={{ width: 48 }} />
@@ -120,7 +123,7 @@ export default function AddMedicationScreen() {
             <TextInput
               style={[styles.input, { fontSize }]}
               placeholder="e.g., Paracetamol 500mg"
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor={colors.textLight}
               value={medicationName}
               onChangeText={setMedicationName}
               testID="medication-name-input"
@@ -136,7 +139,7 @@ export default function AddMedicationScreen() {
                 activeOpacity={0.8}
                 testID="add-time-button"
               >
-                <Plus size={18} color={Colors.primary} strokeWidth={2.5} />
+                <Plus size={18} color={colors.primary} strokeWidth={2.5} />
                 <Text style={[styles.addTimeText, { fontSize: fontSize - 2 }]}>Add Time</Text>
               </TouchableOpacity>
             </View>
@@ -146,7 +149,7 @@ export default function AddMedicationScreen() {
                 <TextInput
                   style={[styles.timeInput, { fontSize }]}
                   placeholder="HH:MM"
-                  placeholderTextColor={Colors.textLight}
+                  placeholderTextColor={colors.textLight}
                   value={time}
                   onChangeText={(value) => handleUpdateTime(index, value)}
                   keyboardType="numbers-and-punctuation"
@@ -160,7 +163,7 @@ export default function AddMedicationScreen() {
                     activeOpacity={0.8}
                     testID={`remove-time-button-${index}`}
                   >
-                    <X size={20} color={Colors.error} />
+                    <X size={20} color={colors.error} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -176,7 +179,7 @@ export default function AddMedicationScreen() {
             <TextInput
               style={[styles.input, { fontSize }]}
               placeholder="e.g., 7"
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor={colors.textLight}
               value={durationDays}
               onChangeText={setDurationDays}
               keyboardType="number-pad"
@@ -203,137 +206,138 @@ export default function AddMedicationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Platform.OS === 'ios' ? 60 : Spacing.xl,
-    paddingBottom: Spacing.lg,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  backButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontWeight: '700' as const,
-    color: Colors.text,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: Spacing.xl,
-    paddingBottom: 120,
-  },
-  section: {
-    marginBottom: Spacing.xl,
-  },
-  label: {
-    fontWeight: '600' as const,
-    color: Colors.text,
-    marginBottom: Spacing.sm,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-  },
-  input: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    color: Colors.text,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  helperText: {
-    color: Colors.textSecondary,
-    marginTop: Spacing.sm,
-  },
-  addTimeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    backgroundColor: Colors.primary + '15',
-    borderRadius: BorderRadius.sm,
-  },
-  addTimeText: {
-    color: Colors.primary,
-    fontWeight: '600' as const,
-  },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: Spacing.sm,
-  },
-  timeInput: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    color: Colors.text,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  removeTimeButton: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.error + '10',
-    borderRadius: BorderRadius.sm,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: Spacing.xl,
-    backgroundColor: Colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  saveButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-      web: {
-        boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
-      },
-    }),
-  },
-  saveButtonText: {
-    color: Colors.surface,
-    fontWeight: '600' as const,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.lg,
+      paddingTop: Platform.OS === 'ios' ? 60 : Spacing.xl,
+      paddingBottom: Spacing.lg,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    backButton: {
+      width: 48,
+      height: 48,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: {
+      fontWeight: '700' as const,
+      color: colors.text,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      padding: Spacing.xl,
+      paddingBottom: 120,
+    },
+    section: {
+      marginBottom: Spacing.xl,
+    },
+    label: {
+      fontWeight: '600' as const,
+      color: colors.text,
+      marginBottom: Spacing.sm,
+    },
+    labelRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.sm,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.md,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.lg,
+      color: colors.text,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    helperText: {
+      color: colors.textSecondary,
+      marginTop: Spacing.sm,
+    },
+    addTimeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      backgroundColor: colors.primary + '15',
+      borderRadius: BorderRadius.sm,
+    },
+    addTimeText: {
+      color: colors.primary,
+      fontWeight: '600' as const,
+    },
+    timeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      marginBottom: Spacing.sm,
+    },
+    timeInput: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.md,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.lg,
+      color: colors.text,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    removeTimeButton: {
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.error + '10',
+      borderRadius: BorderRadius.sm,
+    },
+    footer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      padding: Spacing.xl,
+      backgroundColor: colors.surface,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: BorderRadius.lg,
+      paddingVertical: Spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 56,
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+        },
+        android: {
+          elevation: 4,
+        },
+        web: {
+          boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
+        },
+      }),
+    },
+    saveButtonText: {
+      color: colors.surface,
+      fontWeight: '600' as const,
+    },
+  });

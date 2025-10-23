@@ -2,6 +2,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { AppData, Medication, DoseHistory, UserSettings, ScheduledDose } from '@/types';
+import { LightColors, DarkColors } from '@/constants/colors';
 
 const STORAGE_KEY = 'careapp_data';
 
@@ -12,6 +13,7 @@ const defaultUserSettings: UserSettings = {
   language: 'en',
   highContrast: false,
   largeText: false,
+  darkMode: false,
   notificationsEnabled: true,
   soundEnabled: true,
   vibrationEnabled: true,
@@ -37,6 +39,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [appData, setAppData] = useState<AppData>(defaultAppData);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const theme = useMemo(
+    () => (appData.user.darkMode ? DarkColors : LightColors),
+    [appData.user.darkMode]
+  );
 
   useEffect(() => {
     loadData();
@@ -297,6 +303,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     appData,
     isLoading,
     isAuthenticated,
+    theme,
     completeOnboarding,
     addMedication,
     updateMedication,
@@ -314,6 +321,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     appData,
     isLoading,
     isAuthenticated,
+    theme,
     completeOnboarding,
     addMedication,
     updateMedication,
