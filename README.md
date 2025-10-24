@@ -138,6 +138,9 @@ rm -rf node_modules && bun i
 ---
 # Learn more
 
+For details on how local data and AppContext work, see
+[LOCAL_STORAGE_AND_APP_CONTEXT.md](./LOCAL_STORAGE_AND_APP_CONTEXT.md)
+
 - [React Native Documentation](https://reactnative.dev/docs/getting-started)
 - [Expo Documentation](https://docs.expo.dev/)
 - [TypeScript in React Native](https://reactnative.dev/docs/typescript)
