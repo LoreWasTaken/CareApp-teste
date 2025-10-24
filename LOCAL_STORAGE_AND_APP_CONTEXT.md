@@ -169,7 +169,8 @@ When data changes (e.g., new medication, dose history update, user preference ch
 
   ```ts
   AsyncStorage.setItem('careapp_data', JSON.stringify(appData));
-```
+  ```
+
 ### 3. **Rehydration**
 
 When the user reopens the app:
