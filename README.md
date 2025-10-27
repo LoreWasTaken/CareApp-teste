@@ -124,7 +124,7 @@ bunx expo start --tunnel
 ```
 3. Check if your firewall is blocking the connection
 
-**Build issues? 
+**Build issues?**
 - Clear cache if needed: 
 ```
 bunx expo start --clear
