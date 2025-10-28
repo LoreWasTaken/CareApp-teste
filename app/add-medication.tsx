@@ -238,7 +238,11 @@ const createStyles = (colors: ThemeColors) =>
     },
     scrollContent: {
       padding: Spacing.xl,
-      paddingBottom: 120,
+      paddingBottom: Platform.select({
+        ios: Spacing.xxl + Spacing.lg,
+        android: Spacing.xxl,
+        default: Spacing.xxl,
+      }),
     },
     section: {
       marginBottom: Spacing.xl,

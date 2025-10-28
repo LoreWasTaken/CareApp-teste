@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Animated, Easing, Vibration } from 'react-native';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -11,8 +11,11 @@ export default function DashboardScreen() {
   const router = useRouter();
   const { appData, getTodaySchedule, getNextDose, markDoseTaken, updateDeviceStatus, theme } = useApp();
   const [settingsLongPress, setSettingsLongPress] = useState<boolean>(false);
+  const [settingsPressing, setSettingsPressing] = useState<boolean>(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const settingsSpinAnim = useRef(new Animated.Value(0)).current;
+  const settingsSpinLoop = useRef<Animated.CompositeAnimation | null>(null);
   const styles = useMemo(() => createStyles(theme), [theme]);
   const colors = theme;
 
@@ -52,11 +55,50 @@ export default function DashboardScreen() {
     return () => clearInterval(timer);
   }, [updateDeviceStatus]);
 
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+      stopSettingsSpin();
+    };
+  }, []);
+
+  const startSettingsSpin = () => {
+    settingsSpinAnim.setValue(0);
+    settingsSpinLoop.current = Animated.loop(
+      Animated.timing(settingsSpinAnim, {
+        toValue: 1,
+        duration: 1200,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    settingsSpinLoop.current.start();
+  };
+
+  const stopSettingsSpin = () => {
+    if (settingsSpinLoop.current) {
+      settingsSpinLoop.current.stop();
+      settingsSpinLoop.current = null;
+    }
+    settingsSpinAnim.stopAnimation();
+    settingsSpinAnim.setValue(0);
+  };
+
   const handleSettingsPressIn = () => {
     console.log('[Dashboard] Settings press started');
+    setSettingsPressing(true);
+    startSettingsSpin();
     longPressTimer.current = setTimeout(() => {
       console.log('[Dashboard] Settings long press detected');
       setSettingsLongPress(true);
+      setSettingsPressing(false);
+      stopSettingsSpin();
+      if (Platform.OS !== 'web') {
+        Vibration.vibrate(40);
+      }
       router.push('/settings');
     }, 3000);
   };
@@ -68,6 +110,8 @@ export default function DashboardScreen() {
       longPressTimer.current = null;
     }
     setSettingsLongPress(false);
+    setSettingsPressing(false);
+    stopSettingsSpin();
   };
 
   const handleTakeDose = () => {
@@ -99,11 +143,30 @@ export default function DashboardScreen() {
         <TouchableOpacity
           onPressIn={handleSettingsPressIn}
           onPressOut={handleSettingsPressOut}
-          style={[styles.settingsButton, settingsLongPress && styles.settingsButtonActive]}
+          style={[
+            styles.settingsButton,
+            (settingsPressing || settingsLongPress) && styles.settingsButtonActive,
+          ]}
           activeOpacity={0.8}
           testID="settings-button"
         >
-          <Settings size={24} color={colors.textSecondary} />
+          <Animated.View
+            style={{
+              transform: [
+                {
+                  rotate: settingsSpinAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '360deg'],
+                  }),
+                },
+              ],
+            }}
+          >
+            <Settings
+              size={24}
+              color={settingsPressing || settingsLongPress ? colors.surface : colors.textSecondary}
+            />
+          </Animated.View>
         </TouchableOpacity>
       </View>
 
@@ -271,18 +334,18 @@ const createStyles = (colors: ThemeColors) =>
     subtitle: {
       color: colors.textSecondary,
       fontWeight: '500' as const,
-    },
-    settingsButton: {
-      width: 48,
-      height: 48,
-      borderRadius: BorderRadius.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.backgroundDark,
-    },
-    settingsButtonActive: {
-      backgroundColor: colors.primary,
-    },
+  },
+  settingsButton: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.backgroundDark,
+  },
+  settingsButtonActive: {
+    backgroundColor: colors.primary,
+  },
     scrollView: {
       flex: 1,
     },

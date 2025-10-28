@@ -215,7 +215,7 @@ export default function OnboardingScreen() {
               </Animated.View>
             )}
 
-            <View style={styles.progressContainer}>
+            <View style={[styles.progressContainer, isLastStep && styles.progressContainerLast]}>
               {STEPS.map((_, index) => (
                 <View
                   key={index}
@@ -346,6 +346,10 @@ const createStyles = (colors: ThemeColors) =>
       marginTop: Spacing.xxl,
       gap: Spacing.sm,
     },
+    progressContainerLast: {
+      marginTop: Spacing.xl,
+      marginBottom: Spacing.lg,
+    },
     progressDot: {
       width: 8,
       height: 8,
@@ -359,7 +363,12 @@ const createStyles = (colors: ThemeColors) =>
     footer: {
       width: '100%',
       paddingHorizontal: Spacing.xl,
-      paddingBottom: Spacing.lg,
+      paddingTop: Spacing.lg,
+      paddingBottom: Platform.select({
+        ios: Spacing.xl,
+        android: Spacing.lg,
+        default: Spacing.lg,
+      }),
       gap: Spacing.md,
     },
     button: {
