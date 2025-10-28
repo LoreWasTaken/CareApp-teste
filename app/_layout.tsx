@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 
@@ -10,9 +11,23 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { appData, isLoading, isAuthenticated } = useApp();
+  const { appData, isLoading, isAuthenticated, theme } = useApp();
   const pathname = usePathname();
   const router = useRouter();
+  const stackScreenOptions = useMemo(
+    () => ({
+      headerShown: false,
+      contentStyle: { backgroundColor: theme.background },
+    }),
+    [theme.background]
+  );
+  const modalScreenOptions = useMemo(
+    () => ({
+      presentation: "modal" as const,
+      contentStyle: { backgroundColor: theme.background },
+    }),
+    [theme.background]
+  );
 
   useEffect(() => {
     if (isLoading) return;
@@ -43,14 +58,16 @@ function RootLayoutNav() {
   }, [appData.onboardingCompleted, isAuthenticated, isLoading, pathname, router]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="onboarding" />
-      <Stack.Screen name="login" />
-      <Stack.Screen name="settings" options={{ presentation: "modal" }} />
-      <Stack.Screen name="add-medication" options={{ presentation: "modal" }} />
-      <Stack.Screen name="debug-storage" options={{ presentation: "modal" }} />
-    </Stack>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      <Stack screenOptions={stackScreenOptions}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="settings" options={modalScreenOptions} />
+        <Stack.Screen name="add-medication" options={modalScreenOptions} />
+        <Stack.Screen name="debug-storage" options={modalScreenOptions} />
+      </Stack>
+    </View>
   );
 }
 

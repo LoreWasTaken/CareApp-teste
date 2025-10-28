@@ -83,8 +83,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const saveData = async (data: AppData) => {
     try {
       console.log('[AppContext] Saving data to AsyncStorage');
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       setAppData(data);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       console.log('[AppContext] Data saved successfully');
     } catch (error) {
       console.error('[AppContext] Error saving data:', error);

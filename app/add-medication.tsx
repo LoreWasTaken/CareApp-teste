@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Platform, Alert, KeyboardAvoidingView } from 'react-native';
 import { useMemo, useState } from 'react';
 import { useRouter, Stack } from 'expo-router';
 import { ChevronLeft, Plus, X } from 'lucide-react-native';
@@ -10,7 +10,7 @@ export default function AddMedicationScreen() {
   const router = useRouter();
   const { appData, addMedication, theme } = useApp();
   const { user } = appData;
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const styles = useMemo(() => createStyles(theme, user.largeText), [theme, user.largeText]);
   const colors = theme;
   
   const [medicationName, setMedicationName] = useState<string>('');
@@ -31,10 +31,28 @@ export default function AddMedicationScreen() {
     }
   };
 
+  const formatTimeValue = (raw: string) => {
+    const digits = raw.replace(/\D/g, '').slice(0, 4);
+    if (digits.length === 0) return '';
+    if (digits.length <= 2) return digits;
+    return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+  };
+
   const handleUpdateTime = (index: number, value: string) => {
-    const newTimes = [...times];
-    newTimes[index] = value;
-    setTimes(newTimes);
+    const formatted = formatTimeValue(value);
+    setTimes(prev => {
+      const next = [...prev];
+      next[index] = formatted;
+      return next;
+    });
+  };
+
+  const handleTimeFocus = (index: number) => {
+    setTimes(prev => {
+      const next = [...prev];
+      next[index] = formatTimeValue(next[index]);
+      return next;
+    });
   };
 
   const handleSave = () => {
@@ -117,96 +135,115 @@ export default function AddMedicationScreen() {
           <View style={{ width: 48 }} />
         </View>
 
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.section}>
-            <Text style={[styles.label, { fontSize }]}>Medication Name *</Text>
-            <TextInput
-              style={[styles.input, { fontSize }]}
-              placeholder="e.g., Paracetamol 500mg"
-              placeholderTextColor={colors.textLight}
-              value={medicationName}
-              onChangeText={setMedicationName}
-              testID="medication-name-input"
-            />
-          </View>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 96 : 0}
+        >
+          <View style={styles.contentWrapper}>
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.section}>
+                <Text style={[styles.label, { fontSize }]}>Medication Name *</Text>
+                <TextInput
+                  style={[styles.input, { fontSize }]}
+                  placeholder="e.g., Paracetamol 500mg"
+                  placeholderTextColor={colors.textLight}
+                  value={medicationName}
+                  onChangeText={setMedicationName}
+                  testID="medication-name-input"
+                  returnKeyType="next"
+                />
+              </View>
 
-          <View style={styles.section}>
-            <View style={styles.labelRow}>
-              <Text style={[styles.label, { fontSize }]}>Times *</Text>
+              <View style={styles.section}>
+                <View style={styles.labelRow}>
+                  <Text style={[styles.label, { fontSize }]}>Times *</Text>
+                  <TouchableOpacity
+                    style={styles.addTimeButton}
+                    onPress={handleAddTime}
+                    activeOpacity={0.8}
+                    testID="add-time-button"
+                  >
+                    <Plus size={18} color={colors.primary} strokeWidth={2.5} />
+                    <Text style={[styles.addTimeText, { fontSize: fontSize - 2 }]}>Add Time</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {times.map((time, index) => (
+                  <View key={index} style={styles.timeRow}>
+                    <TextInput
+                      style={[styles.timeInput, { fontSize }]}
+                      placeholder="HH:MM"
+                      placeholderTextColor={colors.textLight}
+                      value={time}
+                      onFocus={() => handleTimeFocus(index)}
+                      onChangeText={(value) => handleUpdateTime(index, value)}
+                      keyboardType={Platform.OS === 'ios' ? 'number-pad' : 'numeric'}
+                      returnKeyType="next"
+                      maxLength={5}
+                      selectTextOnFocus
+                      testID={`time-input-${index}`}
+                    />
+                    {times.length > 1 && (
+                      <TouchableOpacity
+                        style={styles.removeTimeButton}
+                        onPress={() => handleRemoveTime(index)}
+                        activeOpacity={0.8}
+                        testID={`remove-time-button-${index}`}
+                      >
+                        <X size={20} color={colors.error} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ))}
+
+                <Text style={[styles.helperText, { fontSize: fontSize - 4 }]}>
+                  Enter times in 24-hour format (e.g., 08:00, 14:30)
+                </Text>
+              </View>
+
+              <View style={styles.section}>
+                <Text style={[styles.label, { fontSize }]}>Duration (days) *</Text>
+                <TextInput
+                  style={[styles.input, { fontSize }]}
+                  placeholder="e.g., 7"
+                  placeholderTextColor={colors.textLight}
+                  value={durationDays}
+                  onChangeText={setDurationDays}
+                  keyboardType="number-pad"
+                  returnKeyType="done"
+                  selectTextOnFocus
+                  testID="duration-input"
+                />
+                <Text style={[styles.helperText, { fontSize: fontSize - 4 }]}>
+                  How many days should you take this medication?
+                </Text>
+              </View>
+            </ScrollView>
+
+            <View style={styles.footer}>
               <TouchableOpacity
-                style={styles.addTimeButton}
-                onPress={handleAddTime}
+                style={styles.saveButton}
+                onPress={handleSave}
                 activeOpacity={0.8}
-                testID="add-time-button"
+                testID="save-button"
               >
-                <Plus size={18} color={colors.primary} strokeWidth={2.5} />
-                <Text style={[styles.addTimeText, { fontSize: fontSize - 2 }]}>Add Time</Text>
+                <Text style={[styles.saveButtonText, { fontSize }]}>Save Medication</Text>
               </TouchableOpacity>
             </View>
-
-            {times.map((time, index) => (
-              <View key={index} style={styles.timeRow}>
-                <TextInput
-                  style={[styles.timeInput, { fontSize }]}
-                  placeholder="HH:MM"
-                  placeholderTextColor={colors.textLight}
-                  value={time}
-                  onChangeText={(value) => handleUpdateTime(index, value)}
-                  keyboardType="numbers-and-punctuation"
-                  maxLength={5}
-                  testID={`time-input-${index}`}
-                />
-                {times.length > 1 && (
-                  <TouchableOpacity
-                    style={styles.removeTimeButton}
-                    onPress={() => handleRemoveTime(index)}
-                    activeOpacity={0.8}
-                    testID={`remove-time-button-${index}`}
-                  >
-                    <X size={20} color={colors.error} />
-                  </TouchableOpacity>
-                )}
-              </View>
-            ))}
-
-            <Text style={[styles.helperText, { fontSize: fontSize - 4 }]}>
-              Enter times in 24-hour format (e.g., 08:00, 14:30)
-            </Text>
           </View>
-
-          <View style={styles.section}>
-            <Text style={[styles.label, { fontSize }]}>Duration (days) *</Text>
-            <TextInput
-              style={[styles.input, { fontSize }]}
-              placeholder="e.g., 7"
-              placeholderTextColor={colors.textLight}
-              value={durationDays}
-              onChangeText={setDurationDays}
-              keyboardType="number-pad"
-              testID="duration-input"
-            />
-            <Text style={[styles.helperText, { fontSize: fontSize - 4 }]}>
-              How many days should you take this medication?
-            </Text>
-          </View>
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSave}
-            activeOpacity={0.8}
-            testID="save-button"
-          >
-            <Text style={[styles.saveButtonText, { fontSize }]}>Save Medication</Text>
-          </TouchableOpacity>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </>
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, isLargeText: boolean) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -233,16 +270,19 @@ const createStyles = (colors: ThemeColors) =>
       fontWeight: '700' as const,
       color: colors.text,
     },
+    flex: {
+      flex: 1,
+    },
+    contentWrapper: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
     scrollView: {
       flex: 1,
     },
     scrollContent: {
       padding: Spacing.xl,
-      paddingBottom: Platform.select({
-        ios: Spacing.xxl + Spacing.lg,
-        android: Spacing.xxl,
-        default: Spacing.xxl,
-      }),
+      paddingBottom: isLargeText ? Spacing.xxl + Spacing.lg : Spacing.xxl,
     },
     section: {
       marginBottom: Spacing.xl,
@@ -309,14 +349,12 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: BorderRadius.sm,
     },
     footer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      padding: Spacing.xl,
+      paddingHorizontal: Spacing.xl,
+      paddingVertical: Spacing.lg,
       backgroundColor: colors.surface,
       borderTopWidth: 1,
       borderTopColor: colors.border,
+      alignItems: 'center',
     },
     saveButton: {
       backgroundColor: colors.primary,

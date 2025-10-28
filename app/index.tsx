@@ -129,7 +129,7 @@ export default function DashboardScreen() {
       <StatusBar style={user.darkMode ? 'light' : 'dark'} />
       
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerTextContainer}>
           <Text style={[styles.greeting, { fontSize }]}>{greeting}</Text>
           <Text style={[styles.subtitle, { fontSize: bodyFontSize - 2 }]}>
             {new Date().toLocaleDateString('en-US', { 
@@ -320,11 +320,15 @@ const createStyles = (colors: ThemeColors) =>
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       paddingHorizontal: Spacing.xl,
       paddingTop: Platform.OS === 'ios' ? 60 : Spacing.xl,
       paddingBottom: Spacing.lg,
       backgroundColor: colors.surface,
+    },
+    headerTextContainer: {
+      flex: 1,
+      gap: Spacing.xs / 2,
     },
     greeting: {
       fontWeight: '700' as const,
