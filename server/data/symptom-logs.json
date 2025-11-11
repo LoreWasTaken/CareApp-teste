@@ -1,0 +1,41 @@
+{
+  "symptom_logs": [
+    {
+      "id": "d3bb2d06-bb2a-4ace-88e2-a2d1197d351d",
+      "user_id": "5d22df61-cbf9-45ca-889d-e3ae3b9600e6",
+      "symptom_type": "Dizziness",
+      "severity": 3,
+      "mood_rating": 3,
+      "medications": [],
+      "timestamp": "2025-11-11T17:21:52.627Z",
+      "created_at": "2025-11-11T17:21:52.629Z",
+      "updated_at": "2025-11-11T17:21:52.629Z"
+    },
+    {
+      "id": "8815d8c1-e6ef-489d-95c0-95df17b7e992",
+      "user_id": "5d22df61-cbf9-45ca-889d-e3ae3b9600e6",
+      "symptom_type": "Difficulty Sleeping",
+      "severity": 5,
+      "mood_rating": 3,
+      "medications": [
+        "1762881754636"
+      ],
+      "timestamp": "2025-11-11T17:22:43.560Z",
+      "created_at": "2025-11-11T17:22:43.561Z",
+      "updated_at": "2025-11-11T17:22:43.561Z"
+    },
+    {
+      "id": "94cd00d8-8002-4504-9ecb-fea8e363bcde",
+      "user_id": "5d22df61-cbf9-45ca-889d-e3ae3b9600e6",
+      "symptom_type": "Fatigue",
+      "severity": 3,
+      "mood_rating": 3,
+      "medications": [
+        "1762881754636"
+      ],
+      "timestamp": "2025-11-11T17:44:58.448Z",
+      "created_at": "2025-11-11T17:44:58.449Z",
+      "updated_at": "2025-11-11T17:44:58.449Z"
+    }
+  ]
+}

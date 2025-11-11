@@ -21,9 +21,12 @@ export interface DoseHistory {
 
 export interface UserSettings {
   name: string;
+  email: string;
+  authToken?: string;
   language: 'en' | 'pt';
   highContrast: boolean;
   largeText: boolean;
+  darkMode: boolean;
   notificationsEnabled: boolean;
   soundEnabled: boolean;
   vibrationEnabled: boolean;
@@ -51,7 +54,6 @@ export interface AppData {
   medications: Medication[];
   history: DoseHistory[];
   deviceStatus: DeviceStatus;
-  onboardingCompleted: boolean;
 }
 
 export type ScheduledDose = {

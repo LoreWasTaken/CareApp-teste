@@ -1,0 +1,34 @@
+{
+  "alert_rules": [
+    {
+      "id": "60cee82e-9f23-45e7-a1f6-ec22ce498f9b",
+      "user_id": "5d22df61-cbf9-45ca-889d-e3ae3b9600e6",
+      "caregiver_id": "78f973ed-5d7f-4e4a-92af-bfc0f7a96894",
+      "rule_type": "low_inventory",
+      "condition": "{\"days_remaining\":2}",
+      "is_active": true,
+      "created_at": "2025-11-11T17:45:51.049Z",
+      "updated_at": "2025-11-11T17:45:51.049Z"
+    },
+    {
+      "id": "a6b30f2c-7a14-47f6-83ff-35123aaccdc8",
+      "user_id": "5d22df61-cbf9-45ca-889d-e3ae3b9600e6",
+      "caregiver_id": "f012b7df-27fd-445e-99df-f6e86fa8ddc7",
+      "rule_type": "low_inventory",
+      "condition": "{\"days_remaining\":1}",
+      "is_active": true,
+      "created_at": "2025-11-11T17:48:59.048Z",
+      "updated_at": "2025-11-11T17:48:59.048Z"
+    },
+    {
+      "id": "780175b9-2c8f-4391-859b-509c212361a4",
+      "user_id": "5d22df61-cbf9-45ca-889d-e3ae3b9600e6",
+      "caregiver_id": "f012b7df-27fd-445e-99df-f6e86fa8ddc7",
+      "rule_type": "missed_dose",
+      "condition": "{\"hours_missed\":2}",
+      "is_active": true,
+      "created_at": "2025-11-11T17:49:17.998Z",
+      "updated_at": "2025-11-11T17:49:17.998Z"
+    }
+  ]
+}
