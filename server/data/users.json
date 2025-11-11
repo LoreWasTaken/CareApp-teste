@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "id": "user_demo_123",
+      "name": "Demo User",
+      "email": "demo@example.com",
+      "password_hash": "$2b$10$E6Ey067XmViSsbo8zrHC9uu3Bmw9.0EG7iSTkrSW1DaRUgRrGWm8i",
+      "created_at": "2025-01-01T00:00:00.000Z",
+      "updated_at": "2025-01-01T00:00:00.000Z",
+      "is_active": true
+    },
+    {
+      "id": "c9ecf820-2d32-445e-b295-659fd6bf63fb",
+      "name": "Test User",
+      "email": "test@example.com",
+      "password_hash": "$2b$10$4TGyVzEBw5jfWvsBAFaA..Q7xJwMOT2CWmYypT0SjEIHX/.2605ha",
+      "created_at": "2025-11-06T03:02:29.675Z",
+      "updated_at": "2025-11-06T03:02:29.675Z",
+      "is_active": true
+    },
+    {
+      "id": "5d22df61-cbf9-45ca-889d-e3ae3b9600e6",
+      "name": "",
+      "email": "miguelmmacedo29@gmail.com",
+      "password_hash": "$2b$10$ixzFYp5u53bJJYVYf/2Hv..VEA66enWFXk.bKYgL2LClT/6tMwdxy",
+      "created_at": "2025-11-11T17:05:51.029Z",
+      "updated_at": "2025-11-11T17:05:51.029Z",
+      "is_active": true
+    }
+  ]
+}

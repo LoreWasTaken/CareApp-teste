@@ -1,47 +1,87 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { appData, isLoading } = useApp();
-  const segments = useSegments();
+  const { appData, isLoading, isAuthenticated, theme } = useApp();
+  const pathname = usePathname();
   const router = useRouter();
+  const stackScreenOptions = useMemo(
+    () => ({
+      headerShown: false,
+      contentStyle: { backgroundColor: theme.background },
+    }),
+    [theme.background]
+  );
+  const modalScreenOptions = useMemo(
+    () => ({
+      presentation: "modal" as const,
+      contentStyle: { backgroundColor: theme.background },
+    }),
+    [theme.background]
+  );
 
   useEffect(() => {
     if (isLoading) return;
 
-    const inOnboarding = segments[0] === 'onboarding';
+    const inLogin = pathname === '/login';
+    const inOnboarding = pathname === '/onboarding';
+    const hasUserData = appData.user?.email;
 
-    if (!appData.onboardingCompleted && !inOnboarding) {
-      console.log('[RootLayout] Redirecting to onboarding');
-      router.replace('/onboarding');
-    } else if (appData.onboardingCompleted && inOnboarding) {
+    if (!isAuthenticated) {
+      // If no user data exists, redirect to onboarding for first-time setup
+      if (!hasUserData && !inOnboarding) {
+        console.log('[RootLayout] First-time user, redirecting to onboarding');
+        router.replace('/onboarding');
+        return;
+      }
+      
+      // Otherwise redirect to login
+      if (!inLogin && !inOnboarding) {
+        console.log('[RootLayout] Redirecting to login');
+        router.replace('/login');
+      }
+      return;
+    }
+
+    // If authenticated, redirect away from auth screens
+    if (inLogin || inOnboarding) {
       console.log('[RootLayout] Redirecting to home');
       router.replace('/');
     }
-  }, [appData.onboardingCompleted, isLoading, segments]);
+  }, [isAuthenticated, isLoading, pathname, router, appData.user?.email]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="onboarding" />
-      <Stack.Screen name="settings" options={{ presentation: "modal" }} />
-      <Stack.Screen name="add-medication" options={{ presentation: "modal" }} />
-    </Stack>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      <Stack screenOptions={stackScreenOptions}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="settings" options={modalScreenOptions} />
+        <Stack.Screen name="add-medication" options={modalScreenOptions} />
+        <Stack.Screen name="log-symptom" options={modalScreenOptions} />
+        <Stack.Screen name="doctor-report" options={modalScreenOptions} />
+        <Stack.Screen name="calendar-view" options={modalScreenOptions} />
+        <Stack.Screen name="caregiver-portal" options={modalScreenOptions} />
+        <Stack.Screen name="debug-storage" options={modalScreenOptions} />
+      </Stack>
+    </View>
   );
 }
 
 export default function RootLayout() {
   useEffect(() => {
-    SplashScreen.hideAsync();
+    SplashScreen.hideAsync().catch(() => {
+      /* noop */
+    });
   }, []);
 
   return (

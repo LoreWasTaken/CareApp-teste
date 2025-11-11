@@ -124,7 +124,7 @@ bunx expo start --tunnel
 ```
 3. Check if your firewall is blocking the connection
 
-**Build issues? 
+**Build issues?**
 - Clear cache if needed: 
 ```
 bunx expo start --clear
@@ -137,6 +137,9 @@ rm -rf node_modules && bun i
 
 ---
 # Learn more
+
+For details on how local data and AppContext work, see
+[LOCAL_STORAGE_AND_APP_CONTEXT.md](./LOCAL_STORAGE_AND_APP_CONTEXT.md)
 
 - [React Native Documentation](https://reactnative.dev/docs/getting-started)
 - [Expo Documentation](https://docs.expo.dev/)
